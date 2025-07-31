@@ -19,7 +19,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pillow>=11.3.0",
     "pre-commit>=4.2.0",
     "pyright>=1.1.403",
+]
+fastapi = [
+    "fastapi>=0.116.1",
+    "uvicorn>=0.35.0",
+]
+graph = [
+    "pillow>=11.3.0",
 ]
