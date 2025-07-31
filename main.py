@@ -35,7 +35,7 @@ async def run_graph():
 
     result = await graph.run(
         start_node=BeginResearch(
-            query="detailed report between python package managers pixi and uv"
+            query="Detailed report between python package managers pixi and uv."
         ),
         state=state,
     )
