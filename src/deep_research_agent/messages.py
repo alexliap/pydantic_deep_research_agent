@@ -25,7 +25,14 @@ class ResearchTopic(BaseModel, use_attribute_docstrings=True):
 
 
 class ResearchList(BaseModel, use_attribute_docstrings=True):
-    general_plan: str
+    plan: str
     """General layed out plan about the research."""
     research_topics: list[ResearchTopic]
     """List of research topics to be given to sub-agents."""
+    proceed_to_final_report: bool
+    """If the information is enough proceed to final report generation."""
+
+
+# class Findings(BaseModel, use_attribute_docstrings=True):
+#     relevant_info: list[str]
+#     """Given the search results from sub agents, this should be a list of filtered findings."""

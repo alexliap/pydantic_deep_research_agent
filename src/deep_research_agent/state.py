@@ -7,6 +7,7 @@ from pydantic_ai.messages import ModelMessage
 class ResearchState:
     original_prompt: str | None = None
     briefing: str | None = None
+    supervisor_plan: str | None = None
 
     clarifying_agent_messages: list[ModelMessage] = field(default_factory=list)
     briefing_agent_messages: list[ModelMessage] = field(default_factory=list)

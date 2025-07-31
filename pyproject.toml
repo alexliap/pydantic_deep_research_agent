@@ -13,6 +13,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "logfire>=4.0.0",
+    "pydantic-ai-slim[duckduckgo]>=0.4.7",
     "pydantic-ai",
 ]
 

@@ -5,6 +5,7 @@ from pydantic_graph import Graph
 
 from deep_research_agent.nodes import (
     BeginResearch,
+    FinalReport,
     Researcher,
     Supervisor,
     WriteResearchBrief,
@@ -17,9 +18,13 @@ logfire.instrument_pydantic_ai()
 
 async def run_graph():
     state = ResearchState()
-    graph = Graph(nodes=(BeginResearch, WriteResearchBrief, Supervisor, Researcher))
+    graph = Graph(
+        nodes=(BeginResearch, WriteResearchBrief, Supervisor, Researcher, FinalReport)
+    )
     result = await graph.run(
-        start_node=BeginResearch(query="what are the 10 best restaurants in Athens?"),
+        start_node=BeginResearch(
+            query="detailed report between python package managers pixi and uv"
+        ),
         state=state,
     )
 
