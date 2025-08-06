@@ -34,9 +34,7 @@ async def run_graph():
     generate_graph_image(graph, BeginResearch, "deep_research_graph.jpg")
 
     result = await graph.run(
-        start_node=BeginResearch(
-            query="Detailed report between python package managers pixi and uv."
-        ),
+        start_node=BeginResearch(query="<your_query>"),
         state=state,
     )
 
