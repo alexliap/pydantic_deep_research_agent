@@ -3,6 +3,9 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
+import logfire
+from pydantic_ai.exceptions import UsageLimitExceeded
+from pydantic_ai.usage import UsageLimits
 from pydantic_graph import BaseNode, End, GraphRunContext
 
 from .agents import (
@@ -85,27 +88,33 @@ class Researcher(BaseNode[ResearchState, None, str]):
 
     async def run(self, ctx: GraphRunContext[ResearchState]) -> Supervisor:
         async def agent_task(task: str):
-            result = await research_sub_agent.run(task)
-            return result.output
+            try:
+                # the request limit parameters is supposedly limiting the amount of time the search tool
+                # is going to be used, but up to now it does not
+                result = await research_sub_agent.run(
+                    task, usage_limits=UsageLimits(request_limit=3)
+                )
 
-        research_sub_agents = [
+            except UsageLimitExceeded:
+                logfire.info("Maximum number of tool calls was reached.")
+                result = None
+
+            return result
+
+        research_sub_tasks = [
             agent_task(topic.research_topic) for topic in self.research_topics
         ]
 
         multiple_tasks = await asyncio.gather(
-            *research_sub_agents, return_exceptions=True
+            *research_sub_tasks, return_exceptions=True
         )
         multiple_tasks = [
-            result for result in multiple_tasks if not isinstance(result, BaseException)
+            result.output
+            for result in multiple_tasks
+            if not isinstance(result, BaseException) and result is not None
         ]
 
-        return Supervisor(
-            acquired_results=[
-                result
-                for result in multiple_tasks
-                if not isinstance(result, BaseException)
-            ]
-        )
+        return Supervisor(acquired_results=multiple_tasks)
 
 
 @dataclass
