@@ -54,6 +54,7 @@ class WriteResearchBrief(BaseNode[ResearchState, None, str]):
 class Supervisor(BaseNode[ResearchState]):
     briefing: str | None = None
     acquired_results: list[str] | None = None
+    references: list[str] | None = None
 
     async def run(
         self, ctx: GraphRunContext[ResearchState]
@@ -67,7 +68,11 @@ class Supervisor(BaseNode[ResearchState]):
 
             ctx.state.supervisor_messages += supervisor_plan.new_messages()
 
-        if self.acquired_results:
+        if self.acquired_results and self.references:
+            ctx.state.references += self.references
+
+            ctx.state.references = list(set(ctx.state.references))
+
             supervisor_plan = await research_supervisor.run(
                 self.acquired_results, message_history=ctx.state.supervisor_messages
             )
@@ -108,13 +113,19 @@ class Researcher(BaseNode[ResearchState, None, str]):
         multiple_tasks = await asyncio.gather(
             *research_sub_tasks, return_exceptions=True
         )
-        multiple_tasks = [
-            result.output
+
+        findings = [
+            result.output.content
             for result in multiple_tasks
             if not isinstance(result, BaseException) and result is not None
         ]
 
-        return Supervisor(acquired_results=multiple_tasks)
+        references = []
+        for result in multiple_tasks:
+            if not isinstance(result, BaseException) and result is not None:
+                references += result.output.references
+
+        return Supervisor(acquired_results=findings, references=references)
 
 
 @dataclass
@@ -125,4 +136,7 @@ class FinalReport(BaseNode[ResearchState, None, str]):
             message_history=ctx.state.supervisor_messages,
         )
 
-        return End(final_report.output)
+        references_str = "- " + "\n- ".join(ctx.state.references)
+        report_structure = final_report.output + f"\n\nReferences:\n\n{references_str}"
+
+        return End(report_structure)

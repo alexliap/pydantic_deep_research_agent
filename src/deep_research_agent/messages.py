@@ -33,6 +33,8 @@ class ResearchList(BaseModel, use_attribute_docstrings=True):
     """If the information is enough proceed to final report generation."""
 
 
-# class Findings(BaseModel, use_attribute_docstrings=True):
-#     relevant_info: list[str]
-#     """Given the search results from sub agents, this should be a list of filtered findings."""
+class ResearcherOutput(BaseModel, use_attribute_docstrings=True):
+    content: str
+    """Research findings."""
+    references: list[str]
+    """URL links that were visited during the agent's research."""

@@ -3,7 +3,7 @@ from pydantic_ai import Agent
 from pydantic_ai.common_tools.duckduckgo import duckduckgo_search_tool
 from pydantic_ai.settings import ModelSettings
 
-from .messages import ClarifyWithUser, ResearchList, ResearchQuestion
+from .messages import ClarifyWithUser, ResearcherOutput, ResearchList, ResearchQuestion
 from .prompts import (
     clarify_with_user_instructions,
     compress_research_system_prompt,
@@ -40,7 +40,7 @@ research_supervisor = Agent(
 
 research_sub_agent = Agent(
     OPENAI_MODEL_SMALL,
-    output_type=str,
+    output_type=ResearcherOutput,
     system_prompt=research_system_prompt.format(date=get_date()),
     tools=[duckduckgo_search_tool(max_results=10)],
 )

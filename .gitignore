@@ -247,5 +247,6 @@ share/python-wheels/
 .nox/
 *.py,cover
 cover/
-
+test.py
 .ipynb_checkpoints/
+*.ipynb
