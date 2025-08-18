@@ -72,8 +72,6 @@ class Supervisor(BaseNode[ResearchState]):
         if self.acquired_results and self.references:
             ctx.state.references += self.references
 
-            ctx.state.references = list(set(ctx.state.references))
-
             supervisor_plan = await research_supervisor.run(
                 self.acquired_results, message_history=ctx.state.supervisor_messages
             )
@@ -98,7 +96,7 @@ class Researcher(BaseNode[ResearchState, None, str]):
                 # the request limit parameters is supposedly limiting the amount of time the search tool
                 # is going to be used, but up to now it does not
                 result = await research_sub_agent.run(
-                    task, usage_limits=UsageLimits(request_limit=4)
+                    task, usage_limits=UsageLimits(request_limit=10)
                 )
 
                 result = result.output
@@ -106,13 +104,13 @@ class Researcher(BaseNode[ResearchState, None, str]):
             except UsageLimitExceeded:
                 logfire.info("Maximum number of tool calls was reached.")
                 result = ResearcherOutput(
-                    content="No information gathered.", references=[""]
+                    content=f"No information gathered about {task}.", references=[""]
                 )
             except Exception as e:
                 msg = "Something went wrong when trying ot gather agent's result"
                 logfire.error(f"{msg}: {e}")
                 result = ResearcherOutput(
-                    content="No information gathered.", references=[""]
+                    content=f"No information gathered about {task}.", references=[""]
                 )
 
             return result
@@ -146,7 +144,10 @@ class FinalReport(BaseNode[ResearchState, None, str]):
         # remove LLM generated references
         report = remove_generated_refs(report)
 
-        references_str = "- " + "\n- ".join(ctx.state.references)
+        ctx.state.references = list(set(ctx.state.references))
+        references = [ref for ref in ctx.state.references if ref != ""]
+
+        references_str = "- " + "\n- ".join(references)
         report_structure = report + f"\n\n## References:\n\n{references_str}"
 
         return End(report_structure)
