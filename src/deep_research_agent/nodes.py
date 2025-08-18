@@ -98,7 +98,7 @@ class Researcher(BaseNode[ResearchState, None, str]):
                 # the request limit parameters is supposedly limiting the amount of time the search tool
                 # is going to be used, but up to now it does not
                 result = await research_sub_agent.run(
-                    task, usage_limits=UsageLimits(request_limit=3)
+                    task, usage_limits=UsageLimits(request_limit=4)
                 )
 
                 result = result.output

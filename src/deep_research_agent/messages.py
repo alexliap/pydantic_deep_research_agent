@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ClarifyWithUser(BaseModel):
@@ -31,6 +31,15 @@ class ResearchList(BaseModel, use_attribute_docstrings=True):
     """List of research topics to be given to sub-agents."""
     proceed_to_final_report: bool
     """If the information is enough proceed to final report generation."""
+
+    @model_validator(mode="after")
+    def _check_response_validity(self):
+        if self.research_topics is None and not self.proceed_to_final_report:
+            raise ValueError(
+                "research_topics can only be empty if proceed_to_final_report is True."
+            )
+
+        return self
 
 
 class ResearcherOutput(BaseModel, use_attribute_docstrings=True):
