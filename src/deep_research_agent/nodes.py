@@ -15,9 +15,10 @@ from .agents import (
     research_sub_agent,
     research_supervisor,
 )
-from .messages import ResearchTopic
+from .messages import ResearcherOutput, ResearchTopic
 from .prompts import compress_research_simple_human_message
 from .state import ResearchState
+from .utils import remove_generated_refs, remove_md_headers
 
 
 @dataclass
@@ -47,7 +48,7 @@ class WriteResearchBrief(BaseNode[ResearchState, None, str]):
 
         ctx.state.briefing = briefing.output.research_brief
 
-        return Supervisor(briefing.output.research_brief)
+        return Supervisor(briefing=briefing.output.research_brief)
 
 
 @dataclass
@@ -84,7 +85,7 @@ class Supervisor(BaseNode[ResearchState]):
         if supervisor_plan.output.proceed_to_final_report:
             return FinalReport()
         else:
-            return Researcher(supervisor_plan.output.research_topics)
+            return Researcher(research_topics=supervisor_plan.output.research_topics)
 
 
 @dataclass
@@ -100,9 +101,19 @@ class Researcher(BaseNode[ResearchState, None, str]):
                     task, usage_limits=UsageLimits(request_limit=3)
                 )
 
+                result = result.output
+
             except UsageLimitExceeded:
                 logfire.info("Maximum number of tool calls was reached.")
-                result = None
+                result = ResearcherOutput(
+                    content="No information gathered.", references=[""]
+                )
+            except Exception as e:
+                msg = "Something went wrong when trying ot gather agent's result"
+                logfire.error(f"{msg}: {e}")
+                result = ResearcherOutput(
+                    content="No information gathered.", references=[""]
+                )
 
             return result
 
@@ -114,16 +125,11 @@ class Researcher(BaseNode[ResearchState, None, str]):
             *research_sub_tasks, return_exceptions=True
         )
 
-        findings = [
-            result.output.content
-            for result in multiple_tasks
-            if not isinstance(result, BaseException) and result is not None
-        ]
+        findings = [result.content for result in multiple_tasks]
 
         references = []
         for result in multiple_tasks:
-            if not isinstance(result, BaseException) and result is not None:
-                references += result.output.references
+            references += result.references
 
         return Supervisor(acquired_results=findings, references=references)
 
@@ -135,8 +141,12 @@ class FinalReport(BaseNode[ResearchState, None, str]):
             compress_research_simple_human_message,
             message_history=ctx.state.supervisor_messages,
         )
+        # remove markdown headers (```markdown & ```) if they exist
+        report = remove_md_headers(final_report.output)
+        # remove LLM generated references
+        report = remove_generated_refs(report)
 
         references_str = "- " + "\n- ".join(ctx.state.references)
-        report_structure = final_report.output + f"\n\nReferences:\n\n{references_str}"
+        report_structure = report + f"\n\n## References:\n\n{references_str}"
 
         return End(report_structure)
