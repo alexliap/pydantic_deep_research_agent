@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from urllib.error import HTTPError, URLError
+from urllib.request import urlopen
 
 import logfire
 from pydantic_ai.exceptions import UsageLimitExceeded
@@ -69,8 +71,9 @@ class Supervisor(BaseNode[ResearchState]):
 
             ctx.state.supervisor_messages += supervisor_plan.new_messages()
 
-        if self.acquired_results and self.references:
-            ctx.state.references += self.references
+        if self.acquired_results:
+            if self.references:
+                ctx.state.references += self.references
 
             supervisor_plan = await research_supervisor.run(
                 self.acquired_results, message_history=ctx.state.supervisor_messages
@@ -144,10 +147,31 @@ class FinalReport(BaseNode[ResearchState, None, str]):
         # remove LLM generated references
         report = remove_generated_refs(report)
 
-        ctx.state.references = list(set(ctx.state.references))
-        references = [ref for ref in ctx.state.references if ref != ""]
+        if ctx.state.references:
+            references = self._filter_refs(ctx.state.references)
 
         references_str = "- " + "\n- ".join(references)
         report_structure = report + f"\n\n## References:\n\n{references_str}"
 
         return End(report_structure)
+
+    @staticmethod
+    def _filter_refs(references: list[str]):
+        filtered_references = list(set(references))
+
+        result = []
+        error_msg = "Not valid URL"
+        for ref in filtered_references:
+            if ref != "":
+                try:
+                    urlopen(ref, timeout=30)
+                except HTTPError as e:
+                    logfire.warning(f"{error_msg}: {e}")
+                except URLError as e:
+                    logfire.warning(f"{error_msg}: {e}")
+                except Exception as e:
+                    logfire.warning(f"{error_msg}: {e}")
+                else:
+                    result.append(ref)
+
+        return result

@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.common_tools.duckduckgo import duckduckgo_search_tool
+from pydantic_ai.models.openai import OpenAIModelSettings
 from pydantic_ai.settings import ModelSettings
 
 from .messages import ClarifyWithUser, ResearcherOutput, ResearchList, ResearchQuestion
@@ -36,6 +37,7 @@ research_supervisor = Agent(
     OPENAI_MODEL_REASON,
     output_type=ResearchList,
     system_prompt=lead_researcher_prompt.format(date=get_date()),
+    model_settings=OpenAIModelSettings(openai_reasoning_effort="high"),
 )
 
 research_sub_agent = Agent(
@@ -49,4 +51,5 @@ report_writer = Agent(
     OPENAI_MODEL_REASON,
     output_type=str,
     system_prompt=compress_research_system_prompt.format(date=get_date()),
+    model_settings=OpenAIModelSettings(openai_reasoning_effort="high"),
 )
