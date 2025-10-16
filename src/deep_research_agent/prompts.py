@@ -59,6 +59,7 @@ Your focus is to conduct research against the overall research question passed i
 2. Produce as many research topics as necessary in order to produce the best and most detailed answer possible.
 3. Reason carefully about whether all of the returned research findings together are comprehensive enough for a detailed report to answer the overall research question.
 4. Iteratively produce more research topics until you are satisfied with the research findings.
+5. DO NOT provide a big and complex research topic, break it down as much as you can to more topics.
 </Instructions>
 
 
