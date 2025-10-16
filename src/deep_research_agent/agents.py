@@ -23,14 +23,14 @@ clarifying_agent = Agent(
     OPENAI_MODEL_BIG,
     output_type=ClarifyWithUser,
     system_prompt=clarify_with_user_instructions.format(date=get_date()),
-    model_settings=OpenAIModelSettings(openai_service_tier="flex"),
+    model_settings=OpenAIModelSettings(openai_service_tier="default"),
 )
 
 briefing_agent = Agent(
     OPENAI_MODEL_BIG,
     output_type=ResearchQuestion,
     system_prompt=transform_messages_into_research_topic_prompt.format(date=get_date()),
-    model_settings=OpenAIModelSettings(openai_service_tier="flex"),
+    model_settings=OpenAIModelSettings(openai_service_tier="default"),
 )
 
 research_supervisor = Agent(
