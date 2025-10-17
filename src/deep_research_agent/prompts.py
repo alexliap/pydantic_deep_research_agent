@@ -124,8 +124,7 @@ You can use any of the tools provided to you to find resources that can help ans
 
 <Criteria for Finishing Research>
 - The user will give you a sense of how much effort you should put into the research. This does not translate ~directly~ to the number of tool calls you should make, but it does give you a sense of the depth of the research you should conduct.
-- DO NOT end your research unless you are satisfied with your research.
-- One case where it's recommended to call this tool is if you see that your previous tool calls have stopped yielding useful information.
+- Try to limit your tool calls to 5. If not satisfied with your research it's ok, make a temporaru summary of what you have and return it.
 </Criteria for Finishing Research>
 
 <Helpful Tips>
