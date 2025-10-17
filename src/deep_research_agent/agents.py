@@ -16,7 +16,7 @@ from .utils import get_date
 load_dotenv()
 
 OPENAI_MODEL_BIG = "openai:gpt-4.1"
-OPENAI_MODEL_SMALL = "openai:gpt-5-nano"
+OPENAI_MODEL_SMALL = "openai:gpt-4.1-nano"
 OPENAI_MODEL_REASON = "openai:o4-mini"
 
 clarifying_agent = Agent(
@@ -47,7 +47,7 @@ research_sub_agent = Agent(
     output_type=ResearcherOutput,
     system_prompt=research_system_prompt.format(date=get_date()),
     tools=[duckduckgo_search_tool(max_results=5)],
-    model_settings=OpenAIModelSettings(openai_service_tier="flex"),
+    model_settings=OpenAIModelSettings(openai_service_tier="default"),
 )
 
 report_writer = Agent(
