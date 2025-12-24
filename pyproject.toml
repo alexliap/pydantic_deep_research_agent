@@ -15,12 +15,12 @@ dependencies = [
     "logfire>=4.0.0",
     "pydantic-ai-slim[duckduckgo]>=0.4.7",
     "pydantic-ai",
+    "ddgs>=9.10.0",
 ]
 
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
-    "pyright>=1.1.403",
 ]
 fastapi = [
     "fastapi>=0.116.1",

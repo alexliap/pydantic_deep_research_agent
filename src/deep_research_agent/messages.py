@@ -25,8 +25,10 @@ class ResearchTopic(BaseModel, use_attribute_docstrings=True):
 
 
 class ResearchList(BaseModel, use_attribute_docstrings=True):
-    plan: str
-    """General layed out plan about the research."""
+    plan: str = Field(
+        description="General layed out plan about the research.", default_factory=str
+    )
+    # """General layed out plan about the research."""
     research_topics: list[ResearchTopic] | None
     """List of research topics to be given to sub-agents."""
     proceed_to_final_report: bool
@@ -41,9 +43,22 @@ class ResearchList(BaseModel, use_attribute_docstrings=True):
 
         return self
 
+    @model_validator(mode="after")
+    def _limit_topics(self):
+        if self.research_topics is not None:
+            if len(self.research_topics) > 10:
+                self.research_topics = self.research_topics[:10]
+
+        return self
+
+
+# class ResearcherOutput(BaseModel, use_attribute_docstrings=True):
+#     content: str
+#     """Research findings."""
+#     references: list[str]
+#     """URL links that were visited during the agent's research."""
+
 
 class ResearcherOutput(BaseModel, use_attribute_docstrings=True):
-    content: str
-    """Research findings."""
-    references: list[str]
-    """URL links that were visited during the agent's research."""
+    search_queries: list[str]
+    """Queries that are going to be used for web search."""
