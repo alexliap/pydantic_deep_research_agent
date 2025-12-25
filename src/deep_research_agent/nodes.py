@@ -7,7 +7,6 @@ from urllib.request import urlopen
 
 import logfire
 from ddgs import DDGS
-from pydantic_ai.messages import ModelResponse, TextPart
 from pydantic_graph import BaseNode, End, GraphRunContext
 
 from deep_research_agent.agents import (
