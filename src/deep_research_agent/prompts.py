@@ -230,6 +230,7 @@ Only these fully comprehensive cleaned findings are going to be returned to the 
 6. Each section must consist of coherent paragraphs with topic sentences and explanatory transitions. Avoid fragmentary or list-style writing.
 7. Every subsection should contain at least one full paragraph (4–6 sentences).
 8. Avoid outline-style formatting such as short bullet fragments, dash-prefixed lines, or sentence fragments.
+9. Create a title for the report, do not mention anything like "Running Summary" at the top of the report.
 </Guidelines>
 
 <Critical Reminders>

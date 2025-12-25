@@ -114,52 +114,6 @@ class Supervisor(BaseNode[ResearchState]):
             return Researcher(research_topics=supervisor_plan.output.research_topics)
 
 
-# @dataclass
-# class Researcher(BaseNode[ResearchState, None, str]):
-#     research_topics: list[ResearchTopic]
-
-#     async def run(self, ctx: GraphRunContext[ResearchState]) -> Supervisor:
-#         async def agent_task(task: str):
-#             try:
-#                 # the request limit parameters is supposedly limiting the amount of time the search tool
-#                 # is going to be used, but up to now it does not
-#                 result = await research_sub_agent.run(
-#                     task, usage_limits=UsageLimits(request_limit=10)
-#                 )
-
-#                 result = result.output
-
-#             except UsageLimitExceeded:
-#                 logfire.info("Maximum number of tool calls was reached.")
-#                 result = ResearcherOutput(
-#                     content=f"No information gathered about {task}.", references=[""]
-#                 )
-#             except Exception as e:
-#                 msg = "Something went wrong when trying ot gather agent's result"
-#                 logfire.error(f"{msg}: {e}")
-#                 result = ResearcherOutput(
-#                     content=f"No information gathered about {task}.", references=[""]
-#                 )
-
-#             return result
-
-#         research_sub_tasks = [
-#             agent_task(topic.research_topic) for topic in self.research_topics
-#         ]
-
-#         multiple_tasks = await asyncio.gather(
-#             *research_sub_tasks, return_exceptions=True
-#         )
-
-#         findings = [result.content for result in multiple_tasks]
-
-#         references = []
-#         for result in multiple_tasks:
-#             references += result.references
-
-#         return Supervisor(acquired_results=findings, references=references)
-
-
 @dataclass
 class Researcher(BaseNode[ResearchState, None, str]):
     research_topics: list[ResearchTopic]
