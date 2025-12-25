@@ -12,6 +12,9 @@ class ResearchState:
     running_summary: str = field(default_factory=str)
     references: list[str] = field(default_factory=list)
 
+    current_research_iterations: int = 0
+    max_research_iterations: int = 5
+
     clarifying_agent_messages: list[SystemPromptPart | UserPromptPart] = field(
         default_factory=list
     )

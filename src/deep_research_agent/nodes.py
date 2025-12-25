@@ -21,8 +21,8 @@ from deep_research_agent.agents import (
 )
 from deep_research_agent.messages import ResearchTopic
 from deep_research_agent.prompts import (
-    acquired_results,
     compress_research_simple_human_message,
+    research_round_prompt,
 )
 from deep_research_agent.state import ResearchState
 from deep_research_agent.utils import remove_generated_refs, remove_md_headers
@@ -72,34 +72,43 @@ class Supervisor(BaseNode[ResearchState]):
         self, ctx: GraphRunContext[ResearchState]
     ) -> Researcher | FinalReport:
         if self.research_brief:
+            ctx.state.current_research_iterations += 1
+
+            logfire.info(
+                f"Research Iteration: {ctx.state.current_research_iterations}/{ctx.state.max_research_iterations} ..."
+            )
+
             supervisor_plan = await research_supervisor.run(self.research_brief)
 
             ctx.state.supervisor_plan = supervisor_plan.output.plan
 
-            # ctx.state.supervisor_messages += supervisor_plan.new_messages()[0].parts  # ty:ignore[unsupported-operator]
-
         if self.acquired_results:
+            ctx.state.current_research_iterations += 1
+
+            logfire.info(
+                f"Research Iteration: {ctx.state.current_research_iterations}/{ctx.state.max_research_iterations} ..."
+            )
+
             if self.references:
                 ctx.state.references += self.references
 
-            supervisor_plan = await research_supervisor.run(
-                acquired_results.format(results="\n\n".join(self.acquired_results)),
-                message_history=[ModelResponse([TextPart(ctx.state.running_summary)])],
+            prompt = research_round_prompt.format(
+                running_summary=ctx.state.running_summary,
+                results="\n\n".join(self.acquired_results),
             )
 
-            updated_running_summary = await draft_summary_agent.run(
-                acquired_results.format(results=self.acquired_results),
-                message_history=[ModelResponse([TextPart(ctx.state.running_summary)])],
-            )
+            supervisor_plan = await research_supervisor.run(prompt)
+
+            updated_running_summary = await draft_summary_agent.run(prompt)
 
             # update the plan
             ctx.state.supervisor_plan = supervisor_plan.output.plan
             # update state running summary
             ctx.state.running_summary = updated_running_summary.output
 
-            # ctx.state.supervisor_messages += supervisor_plan.new_messages()[0].parts  # ty:ignore[unsupported-operator]
-
         if supervisor_plan.output.proceed_to_final_report:
+            return FinalReport()
+        elif ctx.state.current_research_iterations == ctx.state.max_research_iterations:
             return FinalReport()
         else:
             return Researcher(research_topics=supervisor_plan.output.research_topics)
@@ -216,8 +225,9 @@ class Researcher(BaseNode[ResearchState, None, str]):
 class FinalReport(BaseNode[ResearchState, None, str]):
     async def run(self, ctx: GraphRunContext[ResearchState]) -> End[str]:
         final_report = await report_writer.run(
-            compress_research_simple_human_message,
-            message_history=[ModelResponse([TextPart(ctx.state.running_summary)])],
+            compress_research_simple_human_message.format(
+                running_summary=ctx.state.running_summary
+            ),
         )
         # remove markdown headers (```markdown & ```) if they exist
         report = remove_md_headers(final_report.output)

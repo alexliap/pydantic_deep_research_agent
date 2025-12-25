@@ -65,7 +65,7 @@ research_sub_agent_summarizer = Agent(
 )
 
 report_writer = Agent(
-    OPENAI_MODEL_REASON,
+    OPENAI_MODEL_BIG,
     output_type=str,
     system_prompt=compress_research_system_prompt.format(date=get_date()),
     model_settings=OpenAIChatModelSettings(

@@ -209,36 +209,48 @@ structured summary that captures the most important findings, themes, and insigh
 </Critical Reminders>
 """
 
-compress_research_system_prompt = """You are a research assistant that has conducted research on a topic by calling several tools and web searches.
-Your job is now to clean up the findings, but preserve all of the relevant statements and information that the researcher has gathered. For context, today's date is {date}.
+compress_research_system_prompt = """You are a research assistant that has conducted research on a topic by performing web searches.
+Your job is now to clean up the findings, but preserve all of the relevant statements and information that the researcher has gathered.
+For context, today's date is {date}.
 
 <Task>
-You need to clean up information gathered from tool calls and web searches in the existing messages.
+You will be given a draft summary of the findings so far.
+You need to structure the report based on this draft summary.
 All relevant information should be repeated and rewritten verbatim, but in a cleaner format.
 The purpose of this step is just to remove any obviously irrelevant or duplicative information.
-For example, if three sources all say "X", you could say "These three sources all stated X".
 Only these fully comprehensive cleaned findings are going to be returned to the user, so it's crucial that you don't lose any information from the raw messages.
 </Task>
 
 <Guidelines>
 1. Your output findings should be fully comprehensive and include ALL of the information that the researcher has gathered from tool calls and web searches. It is expected that you repeat key information verbatim.
 2. This report can be as long as necessary to return ALL of the information that the researcher has gathered.
-3. In your report, you should return inline citations for each source that the researcher found.
+3. Write the output as a formal technical report intended for stakeholders, not as notes or an outline.
+4. The report should read as continuous prose, similar to an academic or industry white paper.
+5. Do not use bullet points except where enumerating clearly bounded lists (e.g., feature lists, open questions, or tool comparisons).
+6. Each section must consist of coherent paragraphs with topic sentences and explanatory transitions. Avoid fragmentary or list-style writing.
+7. Every subsection should contain at least one full paragraph (4–6 sentences).
+8. Avoid outline-style formatting such as short bullet fragments, dash-prefixed lines, or sentence fragments.
 </Guidelines>
 
-Critical Reminder: It is extremely important that any information that is even remotely relevant to the user's research topic is preserved verbatim (e.g. don't rewrite it, don't summarize it, don't paraphrase it).
+<Critical Reminders>
+- It is extremely important that any information that is even remotely relevant to the user's research topic is preserved verbatim (e.g. don't rewrite it, don't summarize it, don't paraphrase it).
+- If the output resembles meeting notes or a markdown outline, rewrite it as a narrative report before finalizing.
+</Critical Reminders>
 """
 
-compress_research_simple_human_message = """All above messages are about research conducted by an AI Researcher. Please clean up these findings.
+compress_research_simple_human_message = """Organize the report in markdown format.
 
-DO NOT summarize the information. I want the raw information returned, just in a cleaner format. Make sure all relevant information is preserved - you can rewrite findings verbatim.
-
-Organize the report in markdown format.
+Draft Summary:
+{running_summary}
 """
 
-acquired_results = """
+
+research_round_prompt = """
+Previously created summary:
+{running_summary}
+
+
 Newly acquired results:
-
 {results}
 """
 
